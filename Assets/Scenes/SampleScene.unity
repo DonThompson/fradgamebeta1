@@ -1140,7 +1140,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0aca8c8f9aef9984ba085be22217bb27, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneToLoad: Battle
+  sceneToLoad: TurnBasedBattle
 --- !u!58 &856488740
 CircleCollider2D:
   m_ObjectHideFlags: 0
