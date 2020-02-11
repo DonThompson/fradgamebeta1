@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class TriggerBattle : MonoBehaviour
@@ -22,7 +19,6 @@ public class TriggerBattle : MonoBehaviour
         GameController.control.inBattle = true;
         Destroy(GameObject.Find("Enemy"));
         GameController.control.playerDead = true;
-        //Application.LoadLevel(sceneToLoad);       //tutorial but obsolete
         SceneManager.LoadScene(sceneToLoad);
     }
 
