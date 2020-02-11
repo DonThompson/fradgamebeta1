@@ -2,9 +2,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System;
 
 public enum BattleState {
-    START, PLAYERTURN, ENEMYTURN, WON, LOST
+    START, PLAYERTURN, ENEMYTURN, WON, LOST, INPROGRESS
 }
 
 public class BattleSystem : MonoBehaviour
@@ -19,13 +20,19 @@ public class BattleSystem : MonoBehaviour
     public BattleHUD enemyHUD;
 
     public Text dialogText;
+    public Button exitButton;
 
     Unit playerUnit;
     Unit enemyUnit;
 
+    
     // Start is called before the first frame update
     void Start()
     {
+        //hide the exit button - it only works at battle end
+        exitButton.interactable = false;
+        exitButton.gameObject.SetActive(false);
+
         state = BattleState.START;
         StartCoroutine(SetupBattle());
     }
@@ -33,7 +40,8 @@ public class BattleSystem : MonoBehaviour
     private IEnumerator SetupBattle()
     {
         GameObject playerGO = Instantiate(playerPrefab, playerBattleStation);
-        playerUnit = playerGO.GetComponent<Unit>();
+        //Initialize to a copy of the current player.  This ensures the level/hp/etc are maintained
+        playerUnit = PlayerManager.instance.GetPlayerUnit();
         GameObject enemyGO = Instantiate(enemyPrefab, enemyBattleStation);
         enemyUnit = enemyGO.GetComponent<Unit>();
 
@@ -116,18 +124,39 @@ public class BattleSystem : MonoBehaviour
     {
         if (state == BattleState.WON)
         {
-            dialogText.text = "You won the battle!";
+            string victoryText = string.Format("Victory is yours!  {0} experience was gained.", enemyUnit.experienceGained);
+
+            victoryText += playerUnit.GrantExperience(enemyUnit.experienceGained);
+
+            dialogText.text = victoryText;
+
         }
         else if (state == BattleState.LOST)
         {
             dialogText.text = "DEFEATED!";
         }
 
-        StartCoroutine(TransitionOut());
+        EnableExitStateUI();
+    }
+
+    private void EnableExitStateUI()
+    {
+        //Hide all player actions (atk, heal, etc)
+        var buttons = GameObject.FindGameObjectsWithTag("PlayerActionButtons");
+        foreach(GameObject b in buttons)
+        {
+            Destroy(b);
+        }
+
+        //Show the continue button to get out
+        exitButton.interactable = true;
+        exitButton.gameObject.SetActive(true);
     }
 
     IEnumerator TransitionOut()
     {
+        PlayerManager.instance.UpdatePlayerUnit(playerUnit);
+
         yield return new WaitForSeconds(1f);
 
         SceneManager.LoadScene("SampleScene");
@@ -139,6 +168,9 @@ public class BattleSystem : MonoBehaviour
         {
             return;
         }
+
+        //set our action to in progress so other actions cannot happen
+        state = BattleState.INPROGRESS;
 
         StartCoroutine(PlayerAttack());
     }
@@ -170,6 +202,17 @@ public class BattleSystem : MonoBehaviour
             return;
         }
 
+        //set our action to in progress so other actions cannot happen
+        state = BattleState.INPROGRESS;
+
         StartCoroutine(PlayerHeal());
+    }
+
+    public void OnExitButton()
+    {
+        if(state == BattleState.WON || state == BattleState.LOST)
+        {
+            StartCoroutine(TransitionOut());
+        }
     }
 }
