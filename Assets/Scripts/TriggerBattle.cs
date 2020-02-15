@@ -3,29 +3,26 @@ using UnityEngine.SceneManagement;
 
 public class TriggerBattle : MonoBehaviour
 {
+
     public string sceneToLoad;
+    private GameObject thisEnemy;
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if(collision.name == "Player")
         {
-            Destroy(GameObject.Find("Enemy"));
-            SceneManager.LoadScene(sceneToLoad);
+            GameController.instance.BeginEnemyBattle(thisEnemy);
+
+            //Destroy(GameObject.Find("Enemy"));
+            //SceneManager.LoadScene(sceneToLoad);
             //LoadBattleScreen();
         }
-    }
-
-    private void LoadBattleScreen()
-    {
-        GameController.control.inBattle = true;
-        Destroy(GameObject.Find("Enemy"));
-        GameController.control.playerDead = true;
-        SceneManager.LoadScene(sceneToLoad);
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        thisEnemy = transform.parent.gameObject;
     }
 
     // Update is called once per frame
